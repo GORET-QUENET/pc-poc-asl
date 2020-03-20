@@ -1,158 +1,251 @@
-﻿using HandPositionReader.Scripts;
+﻿using HandPositionReader.Scripts.Vizualizer;
 using NUnit.Framework;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace HandPositionReader.Tests.Unit
 {
     public class HandVizualizerTest
     {
-        private readonly HandVizualizer _handLoader;
+        private readonly HandVizualizer _handVizualiser;
         private readonly string _mockPath;
 
         public HandVizualizerTest()
         {
             _mockPath = string.Format("{0}/Tests/MockAsset", Application.dataPath);
-            _handLoader = new HandVizualizer();
+            _handVizualiser = new HandVizualizer(_mockPath);
         }
-
-        #region ToVector3
-        [Test]
-        public void When_ToVector3_With_Scale1()
-        {
-            Vector3 result = _handLoader.ToVector3("3,0|2,9|3,2", '|', 1);
-
-            Assert.AreEqual(new Vector3(3, 2.9f, 3.2f), result);
-        }
-
-        [Test]
-        public void When_ToVector3_With_Scale10()
-        {
-            Vector3 result = _handLoader.ToVector3("3,0|2,9|3,2", '|', 10);
-
-            Assert.AreEqual(new Vector3(30, 29, 32), result);
-        }
-
-        [Test]
-        public void When_ToVector3_With_DotSeparator()
-        {
-            Vector3 result = _handLoader.ToVector3("3,0.2,9.3,2", '.', 1);
-
-            Assert.AreEqual(new Vector3(3, 2.9f, 3.2f), result);
-        }
-
-        [Test]
-        public void When_ToVector3_With_BasSeparator()
-        {
-            Vector3 result = _handLoader.ToVector3("3,0|2,9|3,2", '.', 1);
-
-            Assert.AreEqual(Vector3.zero, result);
-        }
-
-        [Test]
-        public void When_ToVector3_When_CantConvert()
-        {
-            Vector3 result = _handLoader.ToVector3("3,0|2,9", '|', 1);
-
-            Assert.AreEqual(Vector3.zero, result);
-        }
-        #endregion
-
-        #region GetPositions
-        [Test]
-        public void When_GetPositions_Read_Position1of2()
-        {
-            string fileContent = ReadFile("Hand_Positions_Mock");
-            List<Vector3> positions = _handLoader.GetPositions(fileContent, 0, 1);
-
-            List<Vector3> positionsExpected = new List<Vector3>
-            {
-                new Vector3(1,2,1),
-                new Vector3(2,1,2),
-                new Vector3(-0.3f,2.0f,-0.001f),
-                new Vector3(0.3f,-2.0f,0.001f),
-                new Vector3(0,0,0)
-            };
-
-            Assert.AreEqual(positionsExpected, positions);
-        }
-
-        [Test]
-        public void When_GetPositions_Read_Position2of2()
-        {
-            string fileContent = ReadFile("Hand_Positions_Mock");
-            List<Vector3> positions = _handLoader.GetPositions(fileContent, 1, 1);
-
-            List<Vector3> positionsExpected = new List<Vector3>
-            {
-                new Vector3(2,1,2),
-                new Vector3(1,2,1),
-                new Vector3(0,0,0),
-                new Vector3(0.3f,-2.0f,0.001f),
-                new Vector3(-0.3f,2.0f,-0.001f)
-            };
-
-            Assert.AreEqual(positionsExpected, positions);
-        }
-
-        [Test]
-        public void When_GetPositions_Read_Position3of2()
-        {
-            string fileContent = ReadFile("Hand_Positions_Mock");
-            List<Vector3> positions = _handLoader.GetPositions(fileContent, 2, 1);
-
-            Assert.AreEqual(new List<Vector3>(), positions);
-        }
-        #endregion
 
         #region DrawFinger
         [Test]
         public void When_DrawFinger_Draw_1of2()
         {
             LineRenderer lineRenderer = GenerateLineRenderer(8);
-            List<Vector3> positions = GeneratePositions();
+            List<Vector3> handJoint = GenerateHandJoint();
 
-            _handLoader.DrawFinger(positions, lineRenderer, 2, 0, 1);
+            _handVizualiser.DrawFinger(handJoint, lineRenderer, 2, 0, 1);
 
-            Assert.AreEqual(positions[1], lineRenderer.GetPosition(0));
-            Assert.AreEqual(positions[2], lineRenderer.GetPosition(1));
-            Assert.AreEqual(positions[1], lineRenderer.GetPosition(2));
-            Assert.AreEqual(positions[0], lineRenderer.GetPosition(3));
+            Assert.AreEqual(handJoint[1], lineRenderer.GetPosition(0));
+            Assert.AreEqual(handJoint[2], lineRenderer.GetPosition(1));
+            Assert.AreEqual(handJoint[1], lineRenderer.GetPosition(2));
+            Assert.AreEqual(handJoint[0], lineRenderer.GetPosition(3));
         }
 
         [Test]
         public void When_DrawFinger_Draw_2of2()
         {
             LineRenderer lineRenderer = GenerateLineRenderer(8);
-            List<Vector3> positions = GeneratePositions();
+            List<Vector3> handJoint = GenerateHandJoint();
 
-            _handLoader.DrawFinger(positions, lineRenderer, 2, 4, 3);
+            _handVizualiser.DrawFinger(handJoint, lineRenderer, 2, 4, 3);
 
-            Assert.AreEqual(positions[3], lineRenderer.GetPosition(4));
-            Assert.AreEqual(positions[4], lineRenderer.GetPosition(5));
-            Assert.AreEqual(positions[3], lineRenderer.GetPosition(6));
-            Assert.AreEqual(positions[0], lineRenderer.GetPosition(7));
+            Assert.AreEqual(handJoint[3], lineRenderer.GetPosition(4));
+            Assert.AreEqual(handJoint[4], lineRenderer.GetPosition(5));
+            Assert.AreEqual(handJoint[3], lineRenderer.GetPosition(6));
+            Assert.AreEqual(handJoint[0], lineRenderer.GetPosition(7));
         }
 
         [Test]
         public void When_DrawFinger_Draw_3of2()
         {
             LineRenderer lineRenderer = GenerateLineRenderer(8);
-            List<Vector3> positions = GeneratePositions();
+            List<Vector3> handJoint = GenerateHandJoint();
 
-            _handLoader.DrawFinger(positions, lineRenderer, 2, 8, 5);
+            _handVizualiser.DrawFinger(handJoint, lineRenderer, 2, 8, 5);
 
             Vector3[] expectedPositions = Enumerable.Repeat(Vector3.zero, 8).ToArray();
-            Vector3[] generatedPositions = new Vector3[8];
-            lineRenderer.GetPositions(generatedPositions);
+            Vector3[] actualPositions = new Vector3[8];
+            lineRenderer.GetPositions(actualPositions);
 
-            Assert.AreEqual(expectedPositions, generatedPositions);
+            Assert.AreEqual(expectedPositions, actualPositions);
         }
         #endregion
 
-        #region Generetors
+        #region DrawHandLine
+        [Test]
+        public void When_DrawHandLine_Work()
+        {
+            LineRenderer lineRenderer = GenerateLineRenderer(50);
+            List<Vector3> handJoint = GenerateFullHandJoint(1);
+
+            _handVizualiser.DrawHandLine(handJoint, lineRenderer);
+
+            Vector3[] actualPositions = new Vector3[50];
+            lineRenderer.GetPositions(actualPositions);
+            List<Vector3> expectedPositions = ExpectedLineRendererPositions(1);
+
+            Assert.AreEqual(expectedPositions, actualPositions.ToList());
+        }
+
+        [Test]
+        public void When_DrawHandLine_With_BadLineRenderer1of3()
+        {
+            LineRenderer lineRenderer = GenerateLineRenderer(9);
+            List<Vector3> handJoint = GenerateFullHandJoint(1);
+
+            _handVizualiser.DrawHandLine(handJoint, lineRenderer);
+
+            Vector3[] expectedPositions = Enumerable.Repeat(Vector3.zero, 9).ToArray();
+            expectedPositions[0] = handJoint[0];
+            expectedPositions[1] = handJoint[1];
+            Vector3[] actualPositions = new Vector3[9];
+            lineRenderer.GetPositions(actualPositions);
+
+            Assert.AreEqual(expectedPositions, actualPositions);
+        }
+
+        [Test]
+        public void When_DrawHandLine_With_BadLineRenderer2of3()
+        {
+            LineRenderer lineRenderer = GenerateLineRenderer(1);
+            List<Vector3> handJoint = GenerateFullHandJoint(1);
+
+            _handVizualiser.DrawHandLine(handJoint, lineRenderer);
+
+            Vector3[] expectedPositions = Enumerable.Repeat(Vector3.zero, 1).ToArray();
+            Vector3[] actualPositions = new Vector3[1];
+            lineRenderer.GetPositions(actualPositions);
+
+            Assert.AreEqual(expectedPositions, actualPositions);
+        }
+
+        [Test]
+        public void When_DrawHandLine_With_BadLineRenderer3of3()
+        {
+            LineRenderer lineRenderer = null;
+            List<Vector3> handJoint = GenerateFullHandJoint(1);
+
+            _handVizualiser.DrawHandLine(handJoint, lineRenderer);
+
+            Assert.Null(lineRenderer);
+        }
+
+
+        [Test]
+        public void When_DrawHandLine_With_BadHandJoint1of3()
+        {
+            LineRenderer lineRenderer = GenerateLineRenderer(50);
+            List<Vector3> handJoint = new List<Vector3>{
+                new Vector3(1, 1, 1),
+                new Vector3(2, 2, 2),
+                new Vector3(3, 3, 3)
+            };
+
+            _handVizualiser.DrawHandLine(handJoint, lineRenderer);
+
+            Vector3[] expectedPositions = Enumerable.Repeat(Vector3.zero, 50).ToArray();
+            expectedPositions[0] = handJoint[0];
+            expectedPositions[1] = handJoint[1];
+            Vector3[] actualPositions = new Vector3[50];
+            lineRenderer.GetPositions(actualPositions);
+
+            Assert.AreEqual(expectedPositions, actualPositions);
+        }
+
+        [Test]
+        public void When_DrawHandLine_With_BadHandJoint2of3()
+        {
+            LineRenderer lineRenderer = GenerateLineRenderer(50);
+            List<Vector3> handJoint = new List<Vector3>{
+                new Vector3(1, 1, 1)
+            };
+
+            _handVizualiser.DrawHandLine(handJoint, lineRenderer);
+
+            Vector3[] expectedPositions = Enumerable.Repeat(Vector3.zero, 50).ToArray();
+            Vector3[] actualPositions = new Vector3[50];
+            lineRenderer.GetPositions(actualPositions);
+
+            Assert.AreEqual(expectedPositions, actualPositions);
+        }
+
+        [Test]
+        public void When_DrawHandLine_With_BadHandJoint3of3()
+        {
+            LineRenderer lineRenderer = GenerateLineRenderer(50);
+            List<Vector3> handJoint = null;
+
+            _handVizualiser.DrawHandLine(handJoint, lineRenderer);
+
+            Vector3[] expectedPositions = Enumerable.Repeat(Vector3.zero, 50).ToArray();
+            Vector3[] actualPositions = new Vector3[50];
+            lineRenderer.GetPositions(actualPositions);
+
+            Assert.AreEqual(expectedPositions, actualPositions);
+        }
+        #endregion
+
+        #region InitVizualisation & ShowHand
+        [Test]
+        public void When_ShowHand_Work_OnGameObject()
+        {
+            LineRenderer lineRenderer = GenerateLineRenderer(50);
+            GameObject handJointObject = Resources.Load<GameObject>("Prefabs/Hand_Joint");
+
+            _handVizualiser.InitVizualisation("Full_Hand_Positions_Mock");
+            _handVizualiser.ShowHand(lineRenderer, handJointObject);
+
+            List<Vector3> expectedPositions = GenerateFullHandJoint(3);
+            List<Vector3> actualPositions = new List<Vector3>();
+
+            for(int i = 0; i < handJointObject.transform.childCount; i++)
+            {
+                actualPositions.Add(handJointObject.transform.GetChild(i).position);
+            }
+
+            Assert.AreEqual(expectedPositions, actualPositions);
+        }
+
+        [Test]
+        public void When_ShowHand_Work_OnLineRenderer()
+        {
+            LineRenderer lineRenderer = GenerateLineRenderer(50);
+            GameObject handJointObject = Resources.Load<GameObject>("Prefabs/Hand_Joint");
+
+            _handVizualiser.InitVizualisation("Full_Hand_Positions_Mock");
+            _handVizualiser.ShowHand(lineRenderer, handJointObject);
+
+            Vector3[] actualPositions = new Vector3[50];
+            lineRenderer.GetPositions(actualPositions);
+            List<Vector3> expectedPositions = ExpectedLineRendererPositions(3);
+
+            Assert.AreEqual(expectedPositions, actualPositions.ToList());
+        }
+
+        [Test]
+        public void When_ShowHand_With_NullInputs()
+        {
+            _handVizualiser.ShowHand(null, null);
+
+            LogAssert.NoUnexpectedReceived();
+        }
+
+        [Test]
+        public void When_InitVizualisation_With_NullInput()
+        {
+            string errorMessage = string.Format("Could not find file \"{0}\\.txt\"", _mockPath);
+            errorMessage = errorMessage.Replace('/', '\\');
+
+            LogAssert.Expect(LogType.Error, errorMessage);
+            _handVizualiser.InitVizualisation(null);
+            LogAssert.NoUnexpectedReceived();
+        }
+
+        [Test]
+        public void When_InitVizualisation_With_BadFileName()
+        {
+            string errorMessage = string.Format("Could not find file \"{0}\\test.txt\"", _mockPath);
+            errorMessage = errorMessage.Replace('/', '\\');
+
+            LogAssert.Expect(LogType.Error, errorMessage);
+            _handVizualiser.InitVizualisation("test");
+            LogAssert.NoUnexpectedReceived();
+        }
+        #endregion
+
+        #region Local Methods
         private LineRenderer GenerateLineRenderer(int size)
         {
             GameObject gameObject = new GameObject();
@@ -163,9 +256,9 @@ namespace HandPositionReader.Tests.Unit
             return lineRenderer;
         }
 
-        private List<Vector3> GeneratePositions()
+        private List<Vector3> GenerateHandJoint()
         {
-            List<Vector3> positions =  new List<Vector3>
+            List<Vector3> handJoint = new List<Vector3>
             {
                 new Vector3(0,0,1),
                 new Vector3(0,1,0),
@@ -174,16 +267,122 @@ namespace HandPositionReader.Tests.Unit
                 new Vector3(1,0,1)
             };
 
+            return handJoint;
+        }
+
+        private List<Vector3> GenerateFullHandJoint(int scale)
+        {
+            List<Vector3> handJoint = new List<Vector3>
+            {
+                new Vector3(1,1,1),
+                new Vector3(2,2,2),
+                new Vector3(3,3,3),
+                new Vector3(4,4,4),
+                new Vector3(5,5,5),
+                new Vector3(6,6,6),
+                new Vector3(7,7,7),
+                new Vector3(8,8,8),
+                new Vector3(9,9,9),
+                new Vector3(10,10,10),
+                new Vector3(11,11,11),
+                new Vector3(12,12,12),
+                new Vector3(13,13,13),
+                new Vector3(14,14,14),
+                new Vector3(15,15,15),
+                new Vector3(16,16,16),
+                new Vector3(17,17,17),
+                new Vector3(18,18,18),
+                new Vector3(19,19,19),
+                new Vector3(20,20,20),
+                new Vector3(21,21,21),
+                new Vector3(22,22,22),
+                new Vector3(23,23,23),
+                new Vector3(24,24,24),
+                new Vector3(25,25,25),
+                new Vector3(26,26,26)
+            };
+
+            for (int i = 0; i < handJoint.Count; i++)
+            {
+                handJoint[i] *= scale;
+            }
+
+            return handJoint;
+        }
+
+        private List<Vector3> ExpectedLineRendererPositions(int scale)
+        {
+            List<Vector3> positions = new List<Vector3>
+            {
+                new Vector3(1,1,1),
+                new Vector3(2,2,2),
+
+                //Doigt 1
+                new Vector3(3,3,3),
+                new Vector3(4,4,4),
+                new Vector3(5,5,5),
+                new Vector3(6,6,6),
+                new Vector3(5,5,5),
+                new Vector3(4,4,4),
+                new Vector3(3,3,3),
+                new Vector3(1,1,1),
+
+                //Doigt 2
+                new Vector3(7,7,7),
+                new Vector3(8,8,8),
+                new Vector3(9,9,9),
+                new Vector3(10,10,10),
+                new Vector3(11,11,11),
+                new Vector3(10,10,10),
+                new Vector3(9,9,9),
+                new Vector3(8,8,8),
+                new Vector3(7,7,7),
+                new Vector3(1,1,1),
+
+                //Doigt 3
+                new Vector3(12,12,12),
+                new Vector3(13,13,13),
+                new Vector3(14,14,14),
+                new Vector3(15,15,15),
+                new Vector3(16,16,16),
+                new Vector3(15,15,15),
+                new Vector3(14,14,14),
+                new Vector3(13,13,13),
+                new Vector3(12,12,12),
+                new Vector3(1,1,1),
+
+                //Doigt 4
+                new Vector3(17,17,17),
+                new Vector3(18,18,18),
+                new Vector3(19,19,19),
+                new Vector3(20,20,20),
+                new Vector3(21,21,21),
+                new Vector3(20,20,20),
+                new Vector3(19,19,19),
+                new Vector3(18,18,18),
+                new Vector3(17,17,17),
+                new Vector3(1,1,1),
+
+                //Doigt 5
+                new Vector3(22,22,22),
+                new Vector3(23,23,23),
+                new Vector3(24,24,24),
+                new Vector3(25,25,25),
+                new Vector3(26,26,26),
+                new Vector3(25,25,25),
+                new Vector3(24,24,24),
+                new Vector3(23,23,23),
+                new Vector3(22,22,22),
+                new Vector3(1,1,1)
+            };
+
+            for (int i = 0; i < positions.Count; i++)
+            {
+                positions[i] *= scale;
+            }
+
             return positions;
         }
-
         #endregion
-
-        private string ReadFile(string name)
-        {
-            string filePath = string.Format("{0}/{1}.txt", _mockPath, name);
-            StreamReader reader = new StreamReader(filePath);
-            return reader.ReadToEnd();
-        }
     }
 }

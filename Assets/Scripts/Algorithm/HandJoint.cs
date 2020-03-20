@@ -1,12 +1,30 @@
-﻿using System.Collections;
+﻿using HandPositionReader.Scripts.Enums;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace HandPositionReader.Scripts
+namespace HandPositionReader.Scripts.Algorithm
 {
-    public static class Position
+    public class HandJoint
     {
-        public static List<Vector3> One = new List<Vector3>
+        // Ici c'est le patern Singleton le plus simple 
+        private static HandJoint instance;
+        public static HandJoint Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new HandJoint();
+                }
+                return instance;
+            }
+        }
+
+        public Dictionary<EHandJointWord, List<Vector3>> WordDico = new Dictionary<EHandJointWord, List<Vector3>>();
+        public Dictionary<EHandJointWord, List<bool>> TagDico = new Dictionary<EHandJointWord, List<bool>>();
+
+        #region Words
+        public List<Vector3> One = new List<Vector3>
         {
             new Vector3(9.222468f,-9.891273f,45.90612f),
             new Vector3(8.879371f,-13.9753f,44.11894f),
@@ -36,7 +54,10 @@ namespace HandPositionReader.Scripts
             new Vector3(9.048793f,-11.33792f,49.78612f),
         };
 
-        public static List<bool> OneValue = new List<bool>
+        #endregion
+
+        #region Tags
+        public List<bool> OneTag = new List<bool>
         {
             true,
             true,
@@ -71,5 +92,12 @@ namespace HandPositionReader.Scripts
             false,
             false
         };
+        #endregion
+
+        public HandJoint()
+        {
+            WordDico.Add(EHandJointWord.One, One);
+            TagDico.Add(EHandJointWord.One, OneTag);
+        }
     }
 }

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.4465782, g: 0.49641252, b: 0.5748167, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -485,7 +485,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1515627542}
-        m_MethodName: PauseVizualisation
+        m_MethodName: PauseButtonClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1526,7 +1526,7 @@ GameObject:
   - component: {fileID: 1515627542}
   - component: {fileID: 1515627544}
   m_Layer: 0
-  m_Name: HandVizualizer
+  m_Name: Manager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1541,10 +1541,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1515627541}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c8764f4c349df2043be9e3bb2172269a, type: 3}
+  m_Script: {fileID: 11500000, guid: e997c86ddbd367c46bf027fd7d935fab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  HandJoins: {fileID: 6269715589613934533, guid: 11c1e100ec15508479b77a7ea32d40a6,
+  HandJointObject: {fileID: 6269715589613934533, guid: 11c1e100ec15508479b77a7ea32d40a6,
     type: 3}
   LineRenderer: {fileID: 1515627544}
   slider: {fileID: 868462209}
@@ -1943,7 +1943,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1515627542}
-        m_MethodName: StartVizualisation
+        m_MethodName: StartButtonClicked
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
