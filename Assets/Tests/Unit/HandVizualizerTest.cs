@@ -20,7 +20,7 @@ namespace HandPositionReader.Tests.Unit
 
         #region DrawFinger
         [Test]
-        public void When_DrawFinger_Draw_1of2()
+        public void When_DrawFinger_Draw_1of3()
         {
             LineRenderer lineRenderer = GenerateLineRenderer(8);
             List<Vector3> handJoint = GenerateHandJoint();
@@ -34,7 +34,7 @@ namespace HandPositionReader.Tests.Unit
         }
 
         [Test]
-        public void When_DrawFinger_Draw_2of2()
+        public void When_DrawFinger_Draw_2of3()
         {
             LineRenderer lineRenderer = GenerateLineRenderer(8);
             List<Vector3> handJoint = GenerateHandJoint();
@@ -48,7 +48,7 @@ namespace HandPositionReader.Tests.Unit
         }
 
         [Test]
-        public void When_DrawFinger_Draw_3of2()
+        public void When_DrawFinger_Draw_3of3()
         {
             LineRenderer lineRenderer = GenerateLineRenderer(8);
             List<Vector3> handJoint = GenerateHandJoint();

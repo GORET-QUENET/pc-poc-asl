@@ -1,5 +1,6 @@
 ﻿using HandPositionReader.Scripts.Enums;
 using HandPositionReader.Scripts.Structs;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -22,10 +23,10 @@ namespace HandPositionReader.Scripts.Algorithm
         /// </summary>
         /// <param name="files"> La liste des fichiers à annalysé avec au mot recherché.</param>
         /// <param name="generateFile"> Indique si nous devons générer un fichier. </param>
-        /// <param name="generateFileWord"> Indique le mot pour lequel nous générons le fichier. </param>
+        /// <param name="generateFileWord"> Indique le mot et le fichier pour lequel nous générons le fichier. </param>
         /// <param name="generateFileIndex"> Indique l'index du handJoint du fichier à utiliser pour générer le fichier. </param>
         /// <returns> Un dictionnaire de métrics pour chaque mots annalysés </returns>
-        public Dictionary<EHandJointWord, List<Metrics>> RunAlgorithmOnFiles(List<FileWord> files, bool generateFile, EHandJointWord generateFileWord, int generateFileIndex)
+        public Dictionary<EHandJointWord, List<Metrics>> RunAlgorithmOnFiles(List<FileWord> files, bool generateFile, FileWord generateFileWord, int generateFileIndex)
         {
             if (files == null || files.Count == 0)
                 return null;
@@ -49,14 +50,14 @@ namespace HandPositionReader.Scripts.Algorithm
                 nbHandJoint = lines.Where(l => l.Contains("START")).Count();
 
                 // Ici nous pouvons générer un fichier qui contiendra une list<Vector3> des jointures d'un HandJoint.
-                if (generateFile && fileWord.Word == generateFileWord)
+                if (generateFile && fileWord.Equals(generateFileWord))
                 {
                     List<Vector3> handJoint = FileReader.GetHandJoint(fileContent, generateFileIndex, 100);
                     filePath = string.Format("{0}/GeneratedList.cs", _assetPath);
                     GenerateListFileFromHandJoint(handJoint, filePath);
                 }
 
-                metrics = AlgorithmOnWord(fileContent, nbHandJoint, fileWord.Word);
+                metrics = AlgorithmOnWord(fileContent, nbHandJoint, fileWord);
 
                 if (!wordsMetrics.ContainsKey(fileWord.Word))
                 {
@@ -107,15 +108,15 @@ namespace HandPositionReader.Scripts.Algorithm
         /// </summary>
         /// <param name="fileContent"> Contenu du fichier qui contients tous les handjoints enregistrés et à comparer. </param>
         /// <param name="nbHandJoint"> Nombre de handJoints dans le fileContent que nous allons annalyser. </param>
-        /// <param name="word"> Le mot qui devra etre reconue dans le fichier. </param>
+        /// <param name="fileWord"> Le mot qui devra etre reconue dans le fichier. </param>
         /// <returns> Les métrics de l'analyse sur tous les handJoints. </returns>
-        public Metrics AlgorithmOnWord(string fileContent, int nbHandJoint, EHandJointWord word)
+        public Metrics AlgorithmOnWord(string fileContent, int nbHandJoint, FileWord fileWord)
         {
             List<bool> validationList = new List<bool>();
             for (int i = 0; i < nbHandJoint; i++)
             {
                 List<Vector3> handJoint = FileReader.GetHandJoint(fileContent, i, 100);
-                List<Vector3> oneHandJoint = HandJoint.Instance.WordDico[word];
+                List<Vector3> oneHandJoint = HandJoint.Instance.WordDico[fileWord.Word];
 
                 if (IsThisWord(oneHandJoint, handJoint, 200))
                 {
@@ -129,7 +130,7 @@ namespace HandPositionReader.Scripts.Algorithm
                 }
             }
 
-            return GetAlgorithmMetrics(validationList, word);
+            return GetAlgorithmMetrics(validationList, fileWord);
         }
 
         /// <summary>
@@ -156,11 +157,11 @@ namespace HandPositionReader.Scripts.Algorithm
         /// Cette fonction va comparer les validations que nous avons obtenue avec les Tag voulue du mot en entrée et nous en retourner les métrics.
         /// </summary>
         /// <param name="validationList"> La liste des mot reconnue apres annalyse de l'algorithme sur un fichier. </param>
-        /// <param name="word"> Le mot qui à été annalysé pour obtenir ces Tags voulue. </param>
+        /// <param name="fileWord"> Le mot et le nom du fichier qui à été annalysé pour obtenir ces Tags voulue. </param>
         /// <returns> Les métrics de cette annalyse. </returns>
-        public Metrics GetAlgorithmMetrics(List<bool> validationList, EHandJointWord word)
+        public Metrics GetAlgorithmMetrics(List<bool> validationList, FileWord fileWord)
         {
-            List<bool> wordTagList = HandJoint.Instance.TagDico[word];
+            List<bool> wordTagList = HandJoint.Instance.TagDico[fileWord.Word][fileWord.FileName];
 
             if (validationList?.Any() != true || validationList.Count != wordTagList.Count)
                 return Metrics.Zero;

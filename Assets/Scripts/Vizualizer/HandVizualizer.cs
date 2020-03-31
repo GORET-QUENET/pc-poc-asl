@@ -54,10 +54,11 @@ namespace HandPositionReader.Scripts.Vizualizer
         /// </summary>
         /// <param name="lineRenderer"> Ligne qui va relier les joints de la main. </param>
         /// <param name="handJointObject"> Object qui contient les 26 joints de la main. </param>
-        public void ShowHand(LineRenderer lineRenderer, GameObject handJointObject)
+        /// <returns> L'indexe de la position actuellement visualisé. </returns>
+        public int ShowHand(LineRenderer lineRenderer, GameObject handJointObject)
         {
             if (lineRenderer == null || handJointObject == null)
-                return;
+                return 0;
 
             if (_currentHandJoint >= _nbHandJoint)
                 _currentHandJoint = 0;
@@ -72,6 +73,8 @@ namespace HandPositionReader.Scripts.Vizualizer
             }
 
             _currentHandJoint++;
+
+            return _currentHandJoint;
         }
 
         /// <summary>
