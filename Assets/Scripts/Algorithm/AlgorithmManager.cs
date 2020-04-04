@@ -23,8 +23,8 @@ namespace HandPositionReader.Scripts.Algorithm
         [Tooltip("Indique si nous generons le fichier ou non.")]
         public bool GenerateFile;
 
-        [Tooltip("Indique le mot pour lequel on génère le fichier.")]
-        public EHandJointWord GenerateFileWord;
+        [Tooltip("Indique le mot et le fichier pour lequel on génère le fichier.")]
+        public FileWord GenerateFileWord;
 
         [Tooltip("Indique l'index de la HandJoint du fichier à utiliser pour la génération.")]
         public int GenerateFileIndex;

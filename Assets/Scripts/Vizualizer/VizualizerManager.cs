@@ -30,6 +30,9 @@ namespace HandPositionReader.Scripts.Vizualizer
         [Tooltip("Message à afficher lorsque le nom de fichier dans l'InputField n'existe pas.")]
         public GameObject ErrorMessage;
 
+        [Tooltip("Un texte pour afficher la position actuellement visualisé.")]
+        public TMP_Text PositionIndexe;
+
         // Start is called before the first frame update
         void Start()
         {
@@ -61,7 +64,8 @@ namespace HandPositionReader.Scripts.Vizualizer
             {
                 float time = (1f / slider.value) * 4;
 
-                _handVizualizer.ShowHand(LineRenderer, HandJointObject);
+                string text = string.Format("Position : {0}",_handVizualizer.ShowHand(LineRenderer, HandJointObject));
+                PositionIndexe.text = text;
 
                 yield return new WaitForSeconds(time);
             }
